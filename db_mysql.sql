@@ -29,14 +29,19 @@ create table tabelaLeitos (
 );
 
 create table tabelaPacientes (
-    prontPaciente int primary key not null,
+    idPaciente int primary key auto_increment,
+    prontPaciente int,
     nomePaciente varchar(50),
     sexo varchar(3) not null,
-    precaucao varchar(10) not null,
+    precaucao varchar(10),
+    fila varchar(3),
+    origem varchar(15),
+    destino varchar(15),
     idLeito int,
     constraint fk_LeitoPaciente foreign key (idLeito) references tabelaLeitos (idLeito)
 );
 
-drop table tabelaPaciente;
+
+drop table tabelaPacientes;
 ALTER TABLE tabelaLeitos MODIFY disponibilidade varchar(8) NOT NULL;
 SELECT * FROM tabelaQuartos;

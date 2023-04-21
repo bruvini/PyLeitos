@@ -2,19 +2,17 @@
 import time
 import mysql.connector
 import sqlite3
+import os
+from datetime import datetime
 
 #Definição das funções
-
-# Função para criar uma borda na tela
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
 def criar_borda():
     print("=" * 60)
-
-# Função para pausar a tela
 def pausar_tela():
     time.sleep(1)
     print("\n")
-
-#conexão com o banco de dados mysql
 def conexaobd():
     db = mysql.connector.connect(
         host="127.0.0.1",
@@ -23,48 +21,74 @@ def conexaobd():
         database="pyleitos"
     )
     return db
-
 def listarHospitais():
     db = conexaobd()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM tabelaHospitais")
     hospitais = cursor.fetchall()
     return hospitais
-
 def listarSetores(idHosp):
     db = conexaobd()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM tabelaSetores WHERE idHosp=%s", (idHosp,))
     setores = cursor.fetchall()
     return setores
-
 def listarQuartos(idSetor):
     db = conexaobd()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM tabelaQuartos WHERE idSetor=%s", (idSetor,))
     quartos = cursor.fetchall()
     return quartos
-
 def listarLeitos(idQuarto):
     db = conexaobd()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM tabelaLeitos WHERE idQuarto=%s", (idQuarto,))
     leitos = cursor.fetchall()
     return leitos
-
 def atualizarNumQuarto(idQuarto, novoNumQuarto):
     db = conexaobd()
     cursor = db.cursor()
     cursor.execute("UPDATE tabelaQuartos SET numQuarto=%s WHERE idQuarto=%s", (novoNumQuarto, idQuarto,))
     db.commit()
     return cursor.rowcount
-
 def atualizarDisponibilidade(idLeito, novaDisponibilidade):
     db = conexaobd()
     cursor = db.cursor()
     cursor.execute("UPDATE tabelaLeitos SET disponibilidade=%s WHERE idLeito=%s", (novaDisponibilidade, idLeito,))
     db.commit()
     return cursor.rowcount
+
+# Função para o menu de configuração
+def menuConfiguracao():
+    while True:
+        # Limpa a tela
+        clear()
+
+        criar_borda()
+        print("                 MENU DE CONFIGURAÇÃO                ")
+        criar_borda()
+        print("Digite apenas o número da opção desejada: ")
+        print("1 - Gerenciar Hospitais")
+        print("2 - Gerenciar Setores")
+        print("3 - Gerenciar Quartos")
+        print("4 - Gerenciar Leitos")
+        print("5 - Voltar ao menu principal")
+        opcao = input("Opção escolhida: ")
+
+        if opcao == "1":
+            gerenciarHospitais()
+        elif opcao == "2":
+            gerenciarSetores()
+        elif opcao == "3":
+            gerenciarQuartos()
+        elif opcao == "4":
+            gerenciarLeitos()
+        elif opcao == "5":
+            print("Voltando para o menu principal...\n")
+            return
+        else:
+            print("Opção inválida. Tente novamente!\n")
+        pausar_tela()
 
 #gerenciar hospitais
 def gerenciarHospitais():
@@ -178,7 +202,6 @@ def gerenciarSetores():
             return
         else:
             print("Opção inválida. Tente novamente!")
-
 def visualizarSetores():
     criar_borda()
     db = conexaobd()
@@ -196,7 +219,6 @@ def visualizarSetores():
                 hosp_antigo = hosp
             print(f"ID Setor: {idSetor} | Nome Setor: {nomeSetor}")
         pausar_tela()
-
 def adicionarSetor():
     criar_borda()
     nomeSetor = input("Digite o nome do setor a ser adicionado: ")
@@ -219,7 +241,6 @@ def adicionarSetor():
         db.commit()
         print("Setor adicionado com sucesso!")
         pausar_tela()
-
 def atualizarSetor():
     criar_borda()
     # mostra a lista de hospitais
@@ -253,7 +274,6 @@ def atualizarSetor():
     else:
         print("Não há hospitais cadastrados.")
     pausar_tela()
-
 def excluirSetor():
     criar_borda()
     db = conexaobd()
@@ -318,7 +338,6 @@ def gerenciarQuartos():
             return
         else:
             print("Opção inválida. Tente novamente!")
-
 def visualizarQuartos():
     mydb = conexaobd()
     mycursor = mydb.cursor()
@@ -336,7 +355,6 @@ def visualizarQuartos():
     quartos = mycursor.fetchall()
     for quarto in quartos:
         print(quarto[0], quarto[1])
-
 def adicionarQuarto():
     # Lista hospitais e solicita escolha
     mydb = conexaobd()
@@ -346,7 +364,7 @@ def adicionarQuarto():
     print("Escolha o hospital:")
     for hospital in hospitais:
         print(hospital[0], "-", hospital[1])
-    escolha_hospital = input("Digite o número do hospital escolhido: ")
+    escolha_hospital = input("Digite o ID do hospital escolhido: ")
     while not escolha_hospital.isdigit() or int(escolha_hospital) not in range(1, len(hospitais) + 1):
         escolha_hospital = input("Opção inválida, digite novamente: ")
     id_hospital = hospitais[int(escolha_hospital) - 1][0]
@@ -357,7 +375,7 @@ def adicionarQuarto():
     print("Escolha o setor:")
     for setor in setores:
         print(setor[0], "-", setor[1])
-    escolha_setor = input("Digite o número do setor escolhido: ")
+    escolha_setor = input("Digite o ID do setor escolhido: ")
     while not escolha_setor.isdigit() or int(escolha_setor) not in range(1, len(setores) + 1):
         escolha_setor = input("Opção inválida, digite novamente: ")
     id_setor = setores[int(escolha_setor) - 1][0]
@@ -368,7 +386,7 @@ def adicionarQuarto():
     print("Quartos do setor selecionado:")
     for quarto in quartos:
         print(quarto[0], "-", quarto[1])
-    numero_quarto = input("Digite o número do novo quarto: ")
+    numero_quarto = input("Digite o nome/número do novo quarto: ")
     
     # Insere novo quarto na tabelaQuartos
     cursor.execute(f"INSERT INTO tabelaQuartos (nomeQuarto, idSetor) VALUES ('{numero_quarto}', {id_setor})")
@@ -376,7 +394,6 @@ def adicionarQuarto():
     print("Quarto adicionado com sucesso!")
     
     cursor.close()
-
 def atualizarQuarto():
     # Conecta ao banco de dados
     db = conexaobd()
@@ -418,7 +435,6 @@ def atualizarQuarto():
     db.close()
 
     print("Quarto atualizado com sucesso!")
-
 def excluirQuarto():
     # Conectando ao banco de dados
     db = conexaobd()    
@@ -520,7 +536,6 @@ def gerenciarLeitos():
             return
         else:
             print("Opção inválida. Tente novamente!")
-
 def adicionarLeito():
     hospitais = listarHospitais()
     if not hospitais:
@@ -559,17 +574,20 @@ def adicionarLeito():
             disponibilidade = "ATIVO"
         else:
             disponibilidade = "INATIVO"
-        
+        ocupacao = input("O quarto está vago? (s/n): ")
+        if ocupacao.lower() == "s":
+            ocupacao = "VAGO"
+        else:
+            ocupacao = "OCUPADO"
         db = conexaobd()
         cursor = db.cursor()
-        cursor.execute("INSERT INTO tabelaLeitos (numLeito, disponibilidade, idQuarto) VALUES (%s, %s, %s)", (numLeito, disponibilidade, idQuarto))
+        cursor.execute("INSERT INTO tabelaLeitos (numLeito, disponibilidade, ocupacao, idQuarto) VALUES (%s, %s, %s, %s)", (numLeito, disponibilidade, ocupacao, idQuarto))
         db.commit()
         print("Leito adicionado com sucesso!")
         
         resposta = input("Deseja adicionar mais um leito? (s/n): ")
         if resposta.lower() != "s":
             break
-
 def visualizarLeitos():
     hospitais = listarHospitais()
     if not hospitais:
@@ -611,7 +629,6 @@ def visualizarLeitos():
                     print(f"\t\t\tLeito: {leito[1]} | Disponibilidade: {leito[2]}")
                 
     return
-
 def atualizarLeito():
     # Seleciona um hospital
     hospitais = listarHospitais()
@@ -667,7 +684,6 @@ def atualizarLeito():
                     print("Leito atualizado com sucesso! (Disponibilidade)")
                 else:
                     print("Nenhuma alteração realizada.")
-
 def excluirLeito():
     # Listar hospitais e pedir para usuário selecionar um
     hospitais = listarHospitais()
@@ -706,34 +722,158 @@ def excluirLeito():
     print("Leito excluído com sucesso!")
 
 
-# Função para o menu de configuração
-def menuConfiguracao():
+def menuFilaEspera():
     while True:
+        # Limpa a tela
+        clear()
+        
         criar_borda()
-        print("                 MENU DE CONFIGURAÇÃO                ")
+        print("                 FILA DE ESPERA                ")
         criar_borda()
-        print("Digite apenas o número da opção desejada: ")
-        print("1 - Gerenciar Hospitais")
-        print("2 - Gerenciar Setores")
-        print("3 - Gerenciar Quartos")
-        print("4 - Gerenciar Leitos")
-        print("5 - Voltar ao menu principal")
-        opcao = input("Opção escolhida: ")
-
+        print("Selecione uma opção:")
+        print("1 - Visualizar lista de espera")
+        print("2 - Adicionar paciente")
+        print("3 - Transferir paciente")
+        print("4 - Atualizar paciente")
+        print("5 - Remover paciente")
+        print("6 - Voltar ao menu anterior")
+        
+        opcao = input("Digite a opção desejada: ")
+        
         if opcao == "1":
-            gerenciarHospitais()
+            visualizarListaEspera()
         elif opcao == "2":
-            gerenciarSetores()
+            adicionarPacienteListaEspera()
         elif opcao == "3":
-            gerenciarQuartos()
+            transferirPacienteListaEspera()
         elif opcao == "4":
-            gerenciarLeitos()
+            atualizarPacienteListaEspera()
         elif opcao == "5":
-            print("Voltando para o menu principal...\n")
-            return
+            removerPacienteListaEspera()
+        elif opcao == "6":
+            break
         else:
-            print("Opção inválida. Tente novamente!\n")
+            print("Opção inválida.")
+        
         pausar_tela()
+def adicionarPacienteListaEspera():
+    clear()
+    criar_borda()
+    print("ADICIONAR PACIENTE NA LISTA DE ESPERA\n")
+    criar_borda()
+
+    prontuario = int(input("Informe o número do prontuário do paciente: "))
+    nome = input("Informe o nome do paciente: ")
+    sexo = input("Informe o sexo do paciente (M/F): ").upper()
+    while sexo not in ["M", "F"]:
+        sexo = input("Sexo inválido! Informe novamente (M/F): ").upper()
+
+    precaucao = input("O paciente tem precaução de contato? (S/N): ").upper()
+    while precaucao not in ["S", "N"]:
+        precaucao = input("Opção inválida! O paciente tem precaução de contato? (S/N): ").upper()
+
+    if precaucao == "S":
+        tipo_precaucao = input("Informe o tipo de precaução: ")
+    else:
+        tipo_precaucao = "NÃO"
+
+    fila_espera = "S"
+
+    origem = input("Informe o local de origem do paciente: ")
+
+    hospitais = listarHospitais()
+    for hospital in hospitais:
+        print(f"{hospital[0]} - {hospital[1]}")
+    id_hospital = int(input("Informe o código do hospital de destino do paciente: "))
+
+    setores = listarSetores(id_hospital)
+    for setor in setores:
+        print(f"{setor[0]} - {setor[1]}")
+    id_setor = int(input("Informe o código do setor de destino do paciente: "))
+
+    db = conexaobd()
+    cursor = db.cursor()
+
+    # verifica se já existe um paciente com o mesmo número de prontuário
+    cursor.execute("SELECT * FROM tabelaPacientes WHERE prontPaciente=%s", (prontuario,))
+    resultado = cursor.fetchone()
+
+    if resultado is not None:
+        print(f"\n*** Já existe um paciente com o número de prontuário {prontuario} na lista de espera! ***")
+        pausar_tela()
+        return
+
+    # inserindo paciente na tabela tabelaPacientes
+    sql = "INSERT INTO tabelaPacientes (prontPaciente, nomePaciente, sexo, precaucao, fila, origem, hospDestino, setorDestino) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+    val = (prontuario, nome, sexo, tipo_precaucao, fila_espera, origem, id_hospital, id_setor)
+    cursor.execute(sql, val)
+    db.commit()
+
+    print("\n*** Paciente adicionado à lista de espera com sucesso! ***")
+    pausar_tela()
+def visualizarListaEspera():
+    clear()
+    print("### Visualizar Lista de Espera ###\n")
+    hospitais = listarHospitais()
+    for hospital in hospitais:
+        setores = listarSetores(hospital[0])
+        for setor in setores:
+            pacientes = []
+            db = conexaobd()
+            cursor = db.cursor()
+            cursor.execute("SELECT * FROM tabelaPacientes WHERE fila='S' AND setorDestino=%s ORDER BY setorDestino", (setor[2],))
+            pacientes = cursor.fetchall()
+            db.close()
+            if len(pacientes) > 0:
+                print(f"Hospital: {hospital[1]} - Aguardam ir para o setor: {setor[1]}\n")
+                print("{:<6} | {:<20} | {:<4} | {:<10}".format("ORIGEM", "N.PRONTUARIO", "SEXO", "PRECAUCAO"))
+                for paciente in pacientes:
+                    print("{:<6} | {:<20} | {:<4} | {:<10}".format(paciente[7], paciente[1], paciente[3], paciente[4]))
+                pausar_tela()
+def transferirPacienteListaEspera():
+    conexao = conexaobd()
+    cursor = conexao.cursor()
+    # 1. Listar todos os pacientes da lista de espera
+    cursor.execute("SELECT * FROM tabelaPacientes WHERE fila = 'S' ORDER BY setorDestino")
+    pacientes = cursor.fetchall()
+
+    if not pacientes:
+        print("Não há pacientes na lista de espera.")
+    else:
+        # 2. Perguntar ao usuário qual paciente ele quer transferir
+        print("Pacientes na lista de espera:")
+        for i, paciente in enumerate(pacientes):
+            print(f"{i+1}. Prontuário: {paciente[1]} ({paciente[2]}) - Origem: {paciente[7]} - Destino: {paciente[9]}")
+        opcao = input("Digite o número do paciente que deseja transferir: ")
+        paciente_selecionado = pacientes[int(opcao)-1]
+
+    # 3. Listar leitos vagos disponíveis no hospital, setor e quarto de destino
+    cursor.execute(f"SELECT idLeito, numLeito FROM tabelaLeitos WHERE idQuarto = (SELECT idQuarto FROM tabelaQuartos WHERE idSetor= '{paciente_selecionado[9]}') AND ocupacao = 'VAGO'")
+    leitos_vagos = cursor.fetchall()
+
+    if not leitos_vagos:
+        print("Não há leitos vagos disponíveis no hospital, setor e quarto de destino.")
+        return
+
+    # 4. Verificar se há leitos vagos no mesmo quarto com pacientes do mesmo sexo
+    cursor.execute(f"SELECT COUNT(*) FROM tabelaPacientes WHERE setorDestino = '{paciente_selecionado[9]}' AND idLeito IS NOT NULL AND sexo = '{paciente_selecionado[3]}'")
+    qtd_leitos_mesmo_sexo = cursor.fetchone()[0]
+
+    if qtd_leitos_mesmo_sexo == 0:
+        print("Não há pacientes do mesmo sexo no quarto de destino.")
+        return
+
+    # 5. Perguntar ao usuário qual leito deseja selecionar
+    print(f"Leitos vagos disponíveis no quarto de destino:")
+    for i, leito in enumerate(leitos_vagos):
+        print(f"{i+1}. Leito {leito[1]} (idLeito: {leito[0]})")
+    opcao = input("Digite o número do leito que deseja selecionar: ")
+    leito_selecionado = leitos_vagos[int(opcao)-1]
+
+    # 6. Vincular o leito selecionado ao paciente selecionado
+    cursor.execute(f"UPDATE tabelaPacientes SET idLeito = {leito_selecionado[0]}, fila = 'N' WHERE idPaciente = {paciente_selecionado[0]}")
+    print("Paciente transferido com sucesso!")
+
 
 # Função para o menu principal
 def menuPrincipal():
@@ -757,11 +897,10 @@ def menuPrincipal():
         elif opcao == "3":
             print("Remanejando paciente...\n")
         elif opcao == "4":
-            print("Abrindo fila de espera...\n")
+            menuFilaEspera()
         elif opcao == "5":
             print("Fechando plantão...\n")
         elif opcao == "6":
-            print("Abrindo menu de configuração...\n")
             menuConfiguracao()
         else:
             print("Opção inválida. Tente novamente!\n")
