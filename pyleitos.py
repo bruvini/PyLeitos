@@ -109,53 +109,210 @@ def gerenciarHospitais():
             print("Opção inválida. Tente novamente!\n")
             pausar_tela()
 
-#gerenciar as configurações
-def menuConfiguracao ():
+# Função para gerenciar os setores
+def gerenciarSetores():
     while True:
+        criar_borda()
+        print("GERENCIAMENTO DE SETORES")
+        print("Digite apenas o número da opção desejada:")
+        print("1 - Visualizar Setores")
+        print("2 - Adicionar Setor")
+        print("3 - Atualizar Setor")
+        print("4 - Excluir Setor")
+        print("5 - Voltar ao menu anterior")
+
+        opcao = input("Opção escolhida: ")
+
+        if opcao == "1":
+            visualizarSetores()
+        elif opcao == "2":
+            adicionarSetor()
+        elif opcao == "3":
+            atualizarSetor()
+        elif opcao == "4":
+            excluirSetor()
+        elif opcao == "5":
+            return
+        else:
+            print("Opção inválida. Tente novamente!")
+
+def visualizarSetores():
+    db = conexaobd()
+    cursor = db.cursor()
+    cursor.execute("SELECT tabelaHospitais.nomeHospital, tabelaSetores.idSetor, tabelaSetores.nomeSetor FROM tabelaHospitais INNER JOIN tabelaSetores ON tabelaHospitais.idHosp = tabelaSetores.idHosp ORDER BY tabelaHospitais.nomeHospital, tabelaSetores.nomeSetor")
+    result = cursor.fetchall()
+
+    if not result:
+        print("Não há setores cadastrados!")
+    else:
+        hosp_antigo = ""
+        for hosp, idSetor, nomeSetor in result:
+            if hosp != hosp_antigo:
+                print(f"{hosp}:")
+                hosp_antigo = hosp
+            print(f"ID Setor: {idSetor} | Nome Setor: {nomeSetor}")
+        pausar_tela()
+
+def adicionarSetor():
+    nomeSetor = input("Digite o nome do setor a ser adicionado: ")
+    db = conexaobd()
+    cursor = db.cursor()
+    cursor.execute("SELECT idHosp, nomeHospital FROM tabelaHospitais")
+    result = cursor.fetchall()
+
+    if not result:
+        print("Não há hospitais cadastrados!")
+    else:
+        print("Hospitais disponíveis:")
+        for idHosp, nomeHosp in result:
+            print(f"ID Hospital: {idHosp} | Nome Hospital: {nomeHosp}")
+        idHosp = input("Digite o ID do hospital ao qual o setor será vinculado: ")
+
+        db = conexaobd()
+        cursor = db.cursor()
+        cursor.execute("INSERT INTO tabelaSetores (nomeSetor, idHosp) VALUES (%s, %s)", (nomeSetor, idHosp))
+        db.commit()
+        print("Setor adicionado com sucesso!")
+        pausar_tela()
+
+def atualizarSetor():
+    # mostra a lista de hospitais
+    db = conexaobd()
+    cursor = db.cursor()
+    cursor.execute("SELECT idHosp, nomeHospital FROM tabelaHospitais")
+    hospitais = cursor.fetchall()
+    if hospitais:
+        print("Selecione o hospital:")
+        for hospital in hospitais:
+            print(f"{hospital[0]} - {hospital[1]}")
+        idHosp = input("ID do hospital selecionado: ")
+        # mostra a lista de setores do hospital selecionado
+        cursor.execute("SELECT idSetor, nomeSetor FROM tabelaSetores WHERE idHosp = %s", (idHosp,))
+        setores = cursor.fetchall()
+        if setores:
+            print("Selecione o setor:")
+            for setor in setores:
+                print(f"{setor[0]} - {setor[1]}")
+            idSetor = input("ID do setor selecionado: ")
+            novoNomeSetor = input("Digite o novo nome do setor: ")
+            # atualiza o nome do setor
+            cursor.execute("UPDATE tabelaSetores SET nomeSetor = %s WHERE idSetor = %s", (novoNomeSetor, idSetor))
+            db.commit()
+            if cursor.rowcount == 0:
+                print("ID de setor não encontrado. Nenhum setor foi atualizado.")
+            else:
+                print("Setor atualizado com sucesso!")
+        else:
+            print("Não há setores cadastrados para este hospital.")
+    else:
+        print("Não há hospitais cadastrados.")
+    pausar_tela()
+
+def excluirSetor():
+    db = conexaobd()
+    cursor = db.cursor()
+
+    # mostra a lista de hospitais
+    cursor.execute("SELECT idHosp, nomeHospital FROM tabelaHospitais")
+    hospitais = cursor.fetchall()
+    if hospitais:
+        print("Selecione o hospital:")
+        for hospital in hospitais:
+            print(f"{hospital[0]} - {hospital[1]}")
+        idHosp = input("ID do hospital selecionado: ")
+        # mostra a lista de setores do hospital selecionado
+        cursor.execute("SELECT idSetor, nomeSetor FROM tabelaSetores WHERE idHosp = %s", (idHosp,))
+        setores = cursor.fetchall()
+        if setores:
+            print("Selecione o setor a ser excluído:")
+            for setor in setores:
+                print(f"{setor[0]} - {setor[1]}")
+            idSetor = input("ID do setor selecionado: ")
+            # confirmação da exclusão
+            confirmacao = input("Tem certeza que deseja excluir o setor selecionado? (S/N): ")
+            if confirmacao.upper() == "S":
+                cursor.execute("DELETE FROM tabelaSetores WHERE idSetor = %s", (idSetor,))
+                db.commit()
+                if cursor.rowcount == 0:
+                    print("ID de setor não encontrado. Nenhum setor foi excluído.")
+                else:
+                    print("Setor excluído com sucesso!")
+            else:
+                print("Operação cancelada pelo usuário.")
+        else:
+            print("Não há setores cadastrados para este hospital.")
+    else:
+        print("Não há hospitais cadastrados.")
+    pausar_tela()
+
+# Função para gerenciar os leitos
+def gerenciarLeitos():
+    print("Gerenciando leitos...\n")
+    # Adicione aqui o código para gerenciar os leitos
+
+# Função para o menu de configuração
+def menuConfiguracao():
+    while True:
+        criar_borda()
+        print("                 MENU DE CONFIGURAÇÃO                ")
+        criar_borda()
         print("Digite apenas o número da opção desejada: ")
         print("1 - Gerenciar Hospitais")
         print("2 - Gerenciar Setores")
         print("3 - Gerenciar Leitos")
         print("4 - Voltar ao menu principal")
-
         opcao = input("Opção escolhida: ")
 
         if opcao == "1":
-            gerenciarHospitais ()
+            gerenciarHospitais()
         elif opcao == "2":
-            print("Abrindo gerenciamento dos setores\n")
+            gerenciarSetores()
         elif opcao == "3":
-            print("Abrindo gerenciamento dos leitos\n")
+            gerenciarLeitos()
         elif opcao == "4":
-            print("Voltando para o menu principal\n")
+            print("Voltando para o menu principal...\n")
             return
         else:
             print("Opção inválida. Tente novamente!\n")
+        pausar_tela()
 
-print ("Olá, seja bem-vindo ao Sistema PyLeitos")
-print ("Um sistema para gerenciamento de leitos no CHT")
-time.sleep(0.5)
+# Função para o menu principal
+def menuPrincipal():
+    while True:
+        criar_borda()
+        print("               SISTEMA PYLEITOS - MENU PRINCIPAL               ")
+        criar_borda()
+        print("Digite apenas o número da opção desejada: ")
+        print("1 - Iniciar Plantão")
+        print("2 - Transferir paciente")
+        print("3 - Remanejar paciente")
+        print("4 - Fila de espera")
+        print("5 - Fechar plantão")
+        print("6 - Configurações")
+        opcao = input("Opção escolhida: ")
 
-while True:
-    print("Digite apenas o número da opção desejada: ")
-    print("1 - Iniciar Plantão")
-    print("2 - Transferir paciente")
-    print("3 - Remanejar paciente")
-    print("4 - Fechar plantão")
-    print("5 - Configurações")
+        if opcao == "1":
+            print("Iniciando plantão...\n")
+        elif opcao == "2":
+            print("Transferindo paciente...\n")
+        elif opcao == "3":
+            print("Remanejando paciente...\n")
+        elif opcao == "4":
+            print("Abrindo fila de espera...\n")
+        elif opcao == "5":
+            print("Fechando plantão...\n")
+        elif opcao == "6":
+            print("Abrindo menu de configuração...\n")
+            menuConfiguracao()
+        else:
+            print("Opção inválida. Tente novamente!\n")
+        pausar_tela()
 
-    opcao = input("Opção escolhida: ")
+# Programa principal
+criar_borda()
+print("             SISTEMA PYLEITOS - BEM-VINDO             ")
+criar_borda()
+print("Um sistema para gerenciamento de leitos no CHT")
+pausar_tela()
 
-    if opcao == "1":
-        print("Vamos iniciar o plantão\n")
-    elif opcao == "2":
-        print("Vamos transferir um paciente\n")
-    elif opcao == "3":
-        print("Vamos remanejar um paciente\n")
-    elif opcao == "4":
-        print("Vamos fechar o plantão\n")
-    elif opcao == "5":
-        print("Abrindo menu de configuração\n")
-        menuConfiguracao()
-    else:
-        print("Opção inválida. Tente novamente!\n")
+menuPrincipal()
