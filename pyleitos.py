@@ -4,6 +4,15 @@ import mysql.connector
 
 #Definição das funções
 
+# Função para criar uma borda na tela
+def criar_borda():
+    print("=" * 60)
+
+# Função para pausar a tela
+def pausar_tela():
+    time.sleep(1)
+    print("\n")
+
 #conexão com o banco de dados mysql
 def conexaobd():
     db = mysql.connector.connect(
@@ -15,21 +24,23 @@ def conexaobd():
     return db
 
 #gerenciar hospitais
-def gerenciarHospitais ():
+def gerenciarHospitais():
     while True:
+        criar_borda()
+        print("GERENCIAR HOSPITAIS\n")
         print("Digite apenas o número da opção desejada: ")
         print("1 - Visualizar hospitais")
         print("2 - Adicionar um hospital")
         print("3 - Atualizar um hospital")
         print("4 - Excluir um hospital")
         print("5 - Voltar ao menu anterior")
-
+        criar_borda()
 
         opcao = input("Opção escolhida: ")
 
         if opcao == "1":
-            print("Essa é a lista de hospitais já cadastrados: \n")
-
+            criar_borda()
+            print("VISUALIZAR HOSPITAIS\n")
             db = conexaobd()
             cursor = db.cursor()
             cursor.execute("SELECT * FROM tabelaHospitais")
@@ -39,9 +50,11 @@ def gerenciarHospitais ():
                 print(row)
             cursor.close()
             db.close()
-            return
+            pausar_tela()
             
         elif opcao == "2":
+            criar_borda()
+            print("ADICIONAR HOSPITAL\n")
             nomeHospital = input("Digite o nome do hospital sem abreviações: ")
             db = conexaobd()
             cursor = db.cursor()
@@ -50,9 +63,11 @@ def gerenciarHospitais ():
             print(cursor.rowcount, "Registro adicionado")
             cursor.close()
             db.close()
-            return
+            pausar_tela()
 
         elif opcao == "3":
+            criar_borda()
+            print("ATUALIZAR HOSPITAL\n")
             db = conexaobd()
             cursor = db.cursor()
             cursor.execute("SELECT * FROM tabelaHospitais")
@@ -66,9 +81,11 @@ def gerenciarHospitais ():
             print(cursor.rowcount, "Registro atualizado")
             cursor.close()
             db.close()
-            return
+            pausar_tela()
         
         elif opcao == "4":
+            criar_borda()
+            print("EXCLUIR HOSPITAL\n")
             db = conexaobd()
             cursor = db.cursor()
             cursor.execute("SELECT * FROM tabelaHospitais")
@@ -81,14 +98,16 @@ def gerenciarHospitais ():
             print(cursor.rowcount, "Registro deletado")
             cursor.close()
             db.close()
-            return
+            pausar_tela()
         
         elif opcao == "5":
             print("Voltando para o menu anterior\n")
             return
         
         else:
+            criar_borda()
             print("Opção inválida. Tente novamente!\n")
+            pausar_tela()
 
 #gerenciar as configurações
 def menuConfiguracao ():
