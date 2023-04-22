@@ -1,47 +1,48 @@
-create database pyleitos;
-use pyleitos;
+create database pL;
+use pL;
 
-create table tabelaHospitais (
-    idHosp int primary key auto_increment,
-    nomeHospital varchar(100) not null
+create table tbHospitais(
+idHosp int primary key auto_increment,
+nomeHosp varchar(30) not null unique
 );
 
-create table tabelaSetores (
-    idSetor int primary key auto_increment,
-    nomeSetor varchar(100) not null,
-    idHosp int,
-    constraint fk_HospSetor foreign key (idHosp) references tabelaHospitais (idHosp)
+create table tbSetores(
+idSetor int primary key auto_increment,
+hospSetor varchar(30) not null,
+nomeSetor varchar(30) not null
 );
 
-create table tabelaQuartos (
-    idQuarto int primary key auto_increment,
-    nomeQuarto varchar(100) not null,
-    idSetor int,
-    constraint fk_SetorQuarto foreign key (idSetor) references tabelaSetores (idSetor)
+create table tbQuartos(
+idQuarto int primary key auto_increment,
+hospQuarto varchar(30) not null,
+setorQuarto varchar(30) not null,
+nomeSetor varchar(30) not null
 );
 
-create table tabelaLeitos (
-    idLeito int primary key auto_increment,
-    numLeito int not null,
-    disponibilidade varchar(3) not null,
-    idQuarto int, 
-    constraint fk_QuartoLeito foreign key (idQuarto) references tabelaQuartos (idQuarto)
+create table tbLeitos(
+idLeito int primary key auto_increment,
+hospLeito varchar(30) not null,
+setorLeito varchar(30) not null,
+quartoLeito varchar(30) not null,
+numLeito varchar(30) not null,
+disponLeito varchar(10) not null,
+ocupLeito varchar(10) not null,
+prontPaciente char(10) unique,
+sexoPaciente varchar(3),
+contamPaciente varchar(10)
 );
 
-create table tabelaPacientes (
-    idPaciente int primary key auto_increment,
-    prontPaciente int,
-    nomePaciente varchar(50),
-    sexo varchar(3) not null,
-    precaucao varchar(10),
-    fila varchar(3),
-    origem varchar(15),
-    destino varchar(15),
-    idLeito int,
-    constraint fk_LeitoPaciente foreign key (idLeito) references tabelaLeitos (idLeito)
+create table tbPacientes(
+idPaciente int primary key auto_increment,
+hospPaciente varchar(30),
+setorPaciente varchar(30),
+quartoPaciente varchar(30),
+leitoPaciente varchar(30),
+nomePaciente varchar(30) not null,
+prontPaciente varchar(10) not null,
+sexoPaciente varchar(10) not null,
+contamPaciente varchar(10) not null,
+filaEspera varchar(3) not null,
+origemPaciente varchar(10),
+destinoPaciente varchar(10)
 );
-
-
-drop table tabelaPacientes;
-ALTER TABLE tabelaLeitos MODIFY disponibilidade varchar(8) NOT NULL;
-SELECT * FROM tabelaQuartos;
